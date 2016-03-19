@@ -1,0 +1,52 @@
+<!doctype html>
+<html>
+    <head>
+        <link rel="stylesheet" href="/static/min.css">
+        <style type="text/css">
+            #loginbox {
+                height: 10.5em;
+                border: 1px solid rgba(0,0,0,0.16);
+                box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);
+                border-radius: 2px;
+            }
+            #loginbox > .row { margin: 1em 0px; }
+            #loginform { margin-left: 2em; }
+            #loginform input { width: 80%; }
+            #iconbox { margin-right: -1em; border-right: 1px solid black; height: 8.5em; }
+            #iconbox img { margin-left: 1em; }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="row" style="height: 7em; margin-top: 7em;">
+            </div>
+            <div class="row" style="height: 14em;">
+                <div class="col c3">&nbsp;</div>
+                <div class="col c6" id="loginbox">
+                    <div class="row">
+                        <div class="col c4" id="iconbox">
+                            <img src="/static/icon.png">
+                        </div>
+                        <div class="col c8">
+                            <div id="loginform">
+                                <form action="login" method="POST">
+                                    <input name="username" type="text" class="smooth" placeholder="username">
+                                    <input name="password" type="password" class="smooth" placeholder="password">
+                                    <input name="lt" type="hidden" value="{{.lt}}">
+                                    {{ if .service }}
+                                    <input name="service" type="hidden" value="{{.service}}">
+                                    {{ end }}
+                                    <button type="submit" class="btn btn-sm btn-a">Log In</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="text-align: center; font-size: 0.7em; color: gray; margin-top: 3em;">
+                        Powered by <a href="https://github.com/12foo/casablanca">casablanca</a>.
+                    </div>
+                </div>
+                <div class="col c3">&nbsp;</div>
+            </div>
+        </div>
+    </body>
+</html>

@@ -8,6 +8,7 @@ import (
 	"html/template"
 	"io"
 	"net/http"
+	"net/url"
 )
 
 type Template struct {
@@ -18,25 +19,44 @@ func (t Template) Render(w io.Writer, name string, data interface{}, c echo.Cont
 	return t.tpl.ExecuteTemplate(w, name, data)
 }
 
-func requestCredentials(c echo.Context, cas *CAS) error {
-	vals := map[string]interface{}{
-		"lt": cas.GenerateLoginTicket(),
-	}
+func requestCredentials(vals map[string]interface{}, c echo.Context, cas *CAS) {
+	vals["lt"] = cas.GenerateLoginTicket()
 	if service := c.Query("service"); service != "" {
 		vals["service"] = service
 	}
-	return c.Render(http.StatusOK, "login", vals)
 }
 
 func tryLogin(cas *CAS) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		return requestCredentials(c, cas)
+		vals := map[string]interface{}{}
+		requestCredentials(vals, c, cas)
+		return c.Render(http.StatusOK, "login", vals)
 	}
 }
 
 func submitCredentials(cas *CAS) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		return nil
+		username := c.Form("username")
+		password := c.Form("password")
+		vals := map[string]interface{}{}
+		if username != "" && password != "" {
+			if au := cas.Authenticate(username, password); au != nil {
+				if service := c.Form("service"); service != "" {
+					// probably store this as a service ticket?
+					st := cas.GenerateServiceTicket(service)
+					if u, err := url.Parse(service); err != nil {
+						u.Query().Set("ticket", st)
+						return c.Redirect(302, u.String())
+					}
+				} else {
+					// show "you are logged in" message
+				}
+			} else {
+				vals["error"] = "Wrong username or password."
+			}
+		}
+		requestCredentials(vals, c, cas)
+		return c.Render(http.StatusUnauthorized, "login", vals)
 	}
 }
 
